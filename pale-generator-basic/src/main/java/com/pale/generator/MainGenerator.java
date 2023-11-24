@@ -7,23 +7,41 @@ import java.io.File;
 import java.io.IOException;
 
 public class MainGenerator {
-    public static void main(String[] args) throws TemplateException, IOException {
-        //静态文件生成
-        String projectPath = System.getProperty("user.dir");
-        //输入路径
-        String inputPath = projectPath + File.separator + "pale-generator-demo-projects" + File.separator + "acm-template";
-        String outputPath = projectPath;
+    /**
+     * 生成
+     *
+     * @param model 数据模型
+     * @throws TemplateException
+     * @throws IOException
+     */
+    public static void doGenerate(Object model) throws TemplateException, IOException {
+        //当前模块的根路径
+        String projectPath = System.getProperty("user.dir") + File.separator + "pale-generator-basic";
+//        System.out.println(projectPath);
+
+        // 整个项目的根路径
+        File parentFile = new File(projectPath).getParentFile() ;
+//        System.out.println(parentFile);
+
+        // 输入路径
+        String inputPath = new File(parentFile, "pale-generator-demo-projects/acm-template").getAbsolutePath();
+        String outputPath = parentFile.toString();
+        System.out.println(outputPath);
+
+        // 生成静态文件
         StaticGenerator.copyFilesByRecursive(inputPath, outputPath);
 
+        // 生成动态文件
+        String inputDynamicFilePath = projectPath + File.separator + "src/main/resources/templates/MainTemplate.java.ftl";
+        String outputDynamicFilePath = outputPath + File.separator + "acm-template/src/com/pale/acm/MainTemplate.java";
+        DynamicGenerator.doGenerate(inputDynamicFilePath, outputDynamicFilePath, model);
+    }
 
-        //动态文件生成
-        String dynamicinputPath = projectPath + File.separator + "pale-generator-basic" + File.separator + "src/main/resources/templates/MainTemplate.java.ftl";
-        String dynamicoutputPaht = projectPath + File.separator + "MainTemplate.java";
-        // 创建数据模型
+    public static void main(String[] args) throws TemplateException, IOException {
         MainTemplateConfig mainTemplateConfig = new MainTemplateConfig();
         mainTemplateConfig.setAuthor("pale");
-        mainTemplateConfig.setOutputText("结果求和: ");
-        mainTemplateConfig.setLoop(true);
-        DynamicGenerator.doGenerate(dynamicinputPath, dynamicoutputPaht, mainTemplateConfig);
+        mainTemplateConfig.setLoop(false);
+        mainTemplateConfig.setOutputText("求和结果：");
+        doGenerate(mainTemplateConfig);
     }
 }
